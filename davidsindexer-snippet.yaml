@@ -1,0 +1,321 @@
+name: DavidsIndexer
+description: Indexes the document
+host: WORD
+api_set: {}
+script:
+  content: "// ── Default exclude words ────────────────────────────────────────────────────\n\
+    // Common English stop-words that are rarely useful in a book index.\n// Edit\
+    \ this list freely in the Exclude Words box, then click\n// \"Save cached settings\"\
+    \ to persist your changes to this document.\n\nconst DEFAULT_EXCLUDE_WORDS = [\n\
+    \  'a',\n  'ab',\n  'aboard',\n  'about',\n  'above',\n  'across',\n  'after',\n\
+    \  'again',\n  'against',\n  'all',\n  'almost',\n  'already',\n  'also',\n  'although',\n\
+    \  'always',\n  'among',\n  'an',\n  'and',\n  'another',\n  'any',\n  'anyone',\n\
+    \  'anything',\n  'are',\n  'as',\n  'at',\n  'be',\n  'because',\n  'been',\n\
+    \  'before',\n  'below',\n  'between',\n  'both',\n  'but',\n  'by',\n  'can',\n\
+    \  'certain',\n  'could',\n  'did',\n  'do',\n  'does',\n  'done',\n  'during',\n\
+    \  'each',\n  'either',\n  'else',\n  'even',\n  'every',\n  'everyone',\n  'everything',\n\
+    \  'few',\n  'for',\n  'from',\n  'further',\n  'got',\n  'had',\n  'has',\n \
+    \ 'have',\n  'having',\n  'he',\n  'her',\n  'here',\n  'him',\n  'his',\n  'how',\n\
+    \  'however',\n  'i',\n  'if',\n  'in',\n  'into',\n  'is',\n  'it',\n  'its',\n\
+    \  'itself',\n  'just',\n  'last',\n  'like',\n  'more',\n  'most',\n  'much',\n\
+    \  'must',\n  'my',\n  'no',\n  'none',\n  'not',\n  'now',\n  'of',\n  'off',\n\
+    \  'often',\n  'on',\n  'one',\n  'only',\n  'or',\n  'other',\n  'others',\n\
+    \  'our',\n  'out',\n  'over',\n  'own',\n  'per',\n  'same',\n  'shall',\n  'she',\n\
+    \  'should',\n  'so',\n  'some',\n  'such',\n  'than',\n  'that',\n  'the',\n\
+    \  'their',\n  'them',\n  'then',\n  'there',\n  'these',\n  'they',\n  'this',\n\
+    \  'those',\n  'through',\n  'too',\n  'up',\n  'us',\n  'very',\n  'via',\n \
+    \ 'was',\n  'we',\n  'were',\n  'what',\n  'when',\n  'where',\n  'which',\n \
+    \ 'while',\n  'who',\n  'whom',\n  'why',\n  'will',\n  'with',\n  'without',\n\
+    \  'would',\n  'you',\n  'your',\n  'aforesaid',\n  'foresaid',\n  'herein',\n\
+    \  'hereinafter',\n  'hereinbefore',\n  'hereof',\n  'hereunder',\n  'hereto',\n\
+    \  'herewith',\n  'notwithstanding',\n  'said',\n  'thereof',\n  'therein',\n\
+    \  'thereto',\n  'thereunder',\n  'therewith',\n  'whereby',\n  'whereof',\n \
+    \ 'wherein',\n  'whereto',\n  'forthwith',\n  'henceforth',\n  'hitherto',\n \
+    \ 'pursuant',\n  'thenceforth',\n  'whereas',\n  'zero',\n  'one',\n  'two',\n\
+    \  'three',\n  'four',\n  'five',\n  'six',\n  'seven',\n  'eight',\n  'nine',\n\
+    \  'ten',\n  'eleven',\n  'twelve',\n  'thirteen',\n  'fourteen',\n  'fifteen',\n\
+    \  'sixteen',\n  'seventeen',\n  'eighteen',\n  'nineteen',\n  'twenty',\n  'thirty',\n\
+    \  'forty',\n  'fifty',\n  'sixty',\n  'seventy',\n  'eighty',\n  'ninety',\n\
+    \  'hundred',\n  'thousand',\n  'million',\n  'billion',\n  'ab',\n  'ad',\n \
+    \ 'circa',\n  'de',\n  'ergo',\n  'et',\n  'ex',\n  'ibid',\n  'id',\n  'idem',\n\
+    \  'inter',\n  'intra',\n  'ob',\n  'op',\n  'per',\n  'post',\n  'pro',\n  'quasi',\n\
+    \  're',\n  'sic',\n  'sine',\n  'sub',\n  'ultra',\n  'ut',\n  'versus',\n  'via',\n\
+    \  'viz'\n].join(\"\\n\");\n\n// ── Default include phrases ──────────────────────────────────────────────────────\n\
+    // Common Latin and Scottish legal maxims that should be indexed as a whole\n\
+    // phrase rather than as individual words. Edit in the Include Phrases box and\n\
+    // click \"Save cached settings\" to persist.\n\nconst DEFAULT_INCLUDE_PHRASES\
+    \ = [\n  'a quo',\n  'actio in personam',\n  'actio in rem',\n  'ad hoc',\n  'ad\
+    \ interim',\n  'ad litem',\n  'ad valorem',\n  'bona fide',\n  'causa sine qua\
+    \ non',\n  'caveat emptor',\n  'consensus ad idem',\n  'contra proferentem',\n\
+    \  'coram',\n  'curator bonis',\n  'de facto',\n  'de jure',\n  'de plano',\n\
+    \  'delectus personae',\n  'dies non',\n  'dominium utile',\n  'eiusdem generis',\n\
+    \  'error in substantialibus',\n  'ex adverso',\n  'ex capite',\n  'ex facie',\n\
+    \  'ex nudo pacto',\n  'ex parte',\n  'expressum facit cessare tacitum',\n  'forum\
+    \ non conveniens',\n  'functus officio',\n  'habeas corpus',\n  'in camera',\n\
+    \  'in curiam',\n  'in duplum',\n  'in extenso',\n  'in limine',\n  'in loco parentis',\n\
+    \  'in pari delicto',\n  'in pari materia',\n  'in personam',\n  'in propria persona',\n\
+    \  'in rem',\n  'in solidum',\n  'in terrorem',\n  'inter alia',\n  'inter se',\n\
+    \  'inter vivos',\n  'interlocutor',\n  'ipso facto',\n  'jus cogens',\n  'jus\
+    \ quaesitum tertio',\n  'jus tertii',\n  'lex domicilii',\n  'lex fori',\n  'lex\
+    \ loci',\n  'lex situs',\n  'lis alibi pendens',\n  'locus standi',\n  'mora',\n\
+    \  'mora, culpa et dolus',\n  'mutatis mutandis',\n  'nemo dat quod non habet',\n\
+    \  'nemo debet bis vexari',\n  'non est factum',\n  'non sequitur',\n  'obiter\
+    \ dicta',\n  'obiter dictum',\n  'onus probandi',\n  'pacta sunt servanda',\n\
+    \  'pactum de non petendo',\n  'pari passu',\n  'per incuriam',\n  'per se',\n\
+    \  'persona non grata',\n  'prima facie',\n  'pro indiviso',\n  'pro tanto',\n\
+    \  'quantum',\n  'quantum meruit',\n  'quantum valebat',\n  'quod vide',\n  'ratio\
+    \ decidendi',\n  'res ipsa loquitur',\n  'res judicata',\n  'restitutio in integrum',\n\
+    \  'semble',\n  'sine die',\n  'sine qua non',\n  'stare decisis',\n  'sub judice',\n\
+    \  'sui generis',\n  'ultra vires',\n  'uberrimae fidei',\n  'vel non',\n  'volenti\
+    \ non fit injuria'\n].join(\"\\n\");\n\n// ── Text helpers ──────────────────────────────────────────────────────────────\n\
+    \nfunction normalizeText(value, caseSensitive) {\n  const v = caseSensitive ?\
+    \ value : value.toLowerCase();\n  return v.replace(/['']/g, \"'\").replace(/[\"\
+    \"]/g, '\"');\n}\n\nfunction tokenizeWithPositions(text) {\n  const regex = /[\\\
+    p{L}\\p{N}'][\\p{L}\\p{N}'-]*/gu;\n  const out = [];\n  let m;\n  while ((m =\
+    \ regex.exec(text)) !== null) {\n    out.push({ text: m[0], start: m.index, end:\
+    \ m.index + m[0].length });\n  }\n  return out;\n}\n\nfunction findPhraseMatches(text,\
+    \ phrases, caseSensitive) {\n  const haystack = normalizeText(text, caseSensitive);\n\
+    \  const matches = [];\n  for (const phrase of phrases) {\n    const p = normalizeText(phrase,\
+    \ caseSensitive);\n    if (!p) continue;\n    let idx = 0;\n    while (true) {\n\
+    \      idx = haystack.indexOf(p, idx);\n      if (idx === -1) break;\n      matches.push({\
+    \ phrase, start: idx, end: idx + p.length, length: p.length });\n      idx +=\
+    \ 1;\n    }\n  }\n  matches.sort((a, b) => a.start - b.start || b.length - a.length);\n\
+    \  const accepted = [];\n  let cursor = -1;\n  for (const m of matches) {\n  \
+    \  if (m.start >= cursor) { accepted.push(m); cursor = m.end; }\n  }\n  return\
+    \ accepted;\n}\n\nfunction buildIndexPlan(text, config) {\n  const caseSensitive\
+    \ = !!config.caseSensitive;\n  const exclude = new Set((config.excludeWords ||\
+    \ []).map(w => normalizeText(w, caseSensitive)));\n  const includeWords = new\
+    \ Set((config.includeWords || []).map(w => normalizeText(w, caseSensitive)));\n\
+    \  const phraseMatches = findPhraseMatches(text, config.includePhrases || [],\
+    \ caseSensitive);\n  const covered = phraseMatches.map(m => [m.start, m.end]);\n\
+    \  function isCovered(s, e) { return covered.some(([cs, ce]) => s < ce && e >\
+    \ cs); }\n  const tokens = tokenizeWithPositions(text);\n  const wordEntries =\
+    \ [];\n  for (const t of tokens) {\n    if (isCovered(t.start, t.end)) continue;\n\
+    \    const n = normalizeText(t.text, caseSensitive);\n    // Always skip single\
+    \ characters and pure numbers unless explicitly included\n    const isSingleChar\
+    \ = [...t.text].length === 1;\n    const isPureNumber = /^[\\d]+$/.test(t.text);\n\
+    \    if (includeWords.has(n)) {\n      wordEntries.push({ term: t.text, start:\
+    \ t.start, end: t.end });\n    } else if (!isSingleChar && !isPureNumber && !exclude.has(n))\
+    \ {\n      wordEntries.push({ term: t.text, start: t.start, end: t.end });\n \
+    \   }\n  }\n  return { phraseMatches, wordEntries };\n}\n\n// ── UI helpers ────────────────────────────────────────────────────────────────\n\
+    \nfunction parseLines(id) {\n  return document.getElementById(id).value.split(/\\\
+    r?\\n/).map(x => x.trim()).filter(Boolean);\n}\nfunction setStatus(msg) { document.getElementById('status').textContent\
+    \ = msg; }\nfunction setProgress(msg) { document.getElementById('progress').textContent\
+    \ = msg || ''; }\nfunction getCaseSensitive() { return document.getElementById('caseSensitive').checked;\
+    \ }\n\n// ── XML helpers ───────────────────────────────────────────────────────────────\n\
+    \nfunction encodeXml(s) {\n  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,\
+    \ '&gt;').replace(/\"/g, '&quot;');\n}\n\nfunction xeRunXml(term) {\n  const escaped\
+    \ = encodeXml(term);\n  return [\n    '<w:r><w:fldChar w:fldCharType=\"begin\"\
+    /></w:r>',\n    `<w:r><w:instrText xml:space=\"preserve\"> XE &quot;${escaped}&quot;\
+    \ </w:instrText></w:r>`,\n    '<w:r><w:fldChar w:fldCharType=\"end\"/></w:r>'\n\
+    \  ].join('');\n}\n\n// ── Strip field results ──────────────────────────────────────────────────────\n\
+    // Removes everything between fldChar \"separate\" and fldChar \"end\" so that\n\
+    // rendered field values (DATE, DOCPROPERTY, page numbers, etc.) never reach\n\
+    // the indexer. Works on the raw OOXML string before any parsing.\n\nfunction\
+    \ stripFieldResults(xml) {\n  // We need to handle nesting. Use a simple state\
+    \ machine on the XML string.\n  let result = '';\n  let pos = 0;\n  let depth\
+    \ = 0;\n  let inResult = false;\n\n  // Matches fldChar elements in either self-closing\
+    \ or open/close form\n  const re = /<w:fldChar\b[^>]*(?:\\/>|>(?:[\\s\\S]*?)<\\\
+    /w:fldChar>)/g;\n  let fm;\n\n  // Build an ordered list of fldChar positions\
+    \ and types\n  const fldChars = [];\n  while ((fm = re.exec(xml)) !== null) {\n\
+    \    const typeMatch = fm[0].match(/fldCharType=\"([^\"]+)\"/);\n    if (typeMatch)\
+    \ {\n      fldChars.push({ idx: fm.index, end: fm.index + fm[0].length, type:\
+    \ typeMatch[1] });\n    }\n  }\n\n  let cursor = 0;\n  let resultStart = -1;\n\
+    \  let fieldDepth = 0;\n\n  for (const fc of fldChars) {\n    if (fc.type ===\
+    \ 'begin') {\n      fieldDepth++;\n    } else if (fc.type === 'separate' && fieldDepth\
+    \ === 1) {\n      // Everything from here to the matching \"end\" is a field result\
+    \ - mark start\n      resultStart = fc.end;\n    } else if (fc.type === 'end')\
+    \ {\n      if (fieldDepth === 1 && resultStart !== -1) {\n        // Keep everything\
+    \ up to resultStart, skip to fc.idx (start of end fldChar)\n        result +=\
+    \ xml.slice(cursor, resultStart);\n        cursor = fc.idx;\n        resultStart\
+    \ = -1;\n      }\n      fieldDepth = Math.max(0, fieldDepth - 1);\n    }\n  }\n\
+    \  // Append remaining XML after last field\n  result += xml.slice(cursor);\n\
+    \  return result;\n}\n\n// ── Run map ───────────────────────────────────────────────────────────────────\n\
+    // Walks the OOXML token by token, tracking field nesting depth so that\n// field-result\
+    \ runs (rendered DATE, DOCPROPERTY, etc.) are skipped.\n// Only plain text runs\
+    \ outside any field boundary are added to the map.\n\nfunction buildRunMap(xml)\
+    \ {\n  const runs = [];\n  let plainOffset = 0;\n\n  // Match fldChar elements\
+    \ (self-closing or with content), instrText, and runs\n  const tokenRe = /<w:fldChar\\\
+    b[^>]*(?:\\/>|>[\\s\\S]*?<\\/w:fldChar>)|<w:instrText[^>]*>[\\s\\S]*?<\\/w:instrText>|<w:r\\\
+    b[^>]*>[\\s\\S]*?<\\/w:r>/g;\n  let fieldDepth = 0;\n  let inResult   = false;\n\
+    \  let m;\n\n  while ((m = tokenRe.exec(xml)) !== null) {\n    const token = m[0];\n\
+    \n    // ── fldChar: track nesting ────────────────────────────────────────────────\n\
+    \    if (token.startsWith('<w:fldChar')) {\n      const fcType = (token.match(/fldCharType=\"\
+    ([^\"]+)\"/) || [])[1];\n      if (fcType === 'begin') {\n        fieldDepth++;\n\
+    \        inResult = false;\n      } else if (fcType === 'separate') {\n      \
+    \  if (fieldDepth === 1) inResult = true;\n      } else if (fcType === 'end')\
+    \ {\n        fieldDepth = Math.max(0, fieldDepth - 1);\n        if (fieldDepth\
+    \ === 0) inResult = false;\n      }\n      continue;\n    }\n\n    // ── instrText:\
+    \ always skip ────────────────────────────────────────────────\n    if (token.startsWith('<w:instrText'))\
+    \ continue;\n\n    // ── <w:r> run ─────────────────────────────────────────────────────────────\n\
+    \    // Skip if we are inside a field result or nested field\n    if (inResult\
+    \ || fieldDepth > 0) continue;\n\n    const runXml   = token;\n    const runStart\
+    \ = m.index;\n    const runEnd   = m.index + runXml.length;\n\n    // Skip fldChar-carrying\
+    \ runs (belt-and-braces)\n    if (/<w:fldChar/.test(runXml) || /<w:instrText/.test(runXml))\
+    \ continue;\n\n    const tMatch    = /<w:t(\\s[^>]*)?>/.exec(runXml);\n    if\
+    \ (!tMatch) continue;\n    const tCloseIdx = runXml.lastIndexOf('</w:t>');\n \
+    \   if (tCloseIdx === -1) continue;\n\n    const tOpenTag = tMatch[0];\n    const\
+    \ rawText  = runXml.slice(tMatch.index + tOpenTag.length, tCloseIdx);\n\n    const\
+    \ decoded = rawText\n      .replace(/&amp;/g,  '&')\n      .replace(/&lt;/g, \
+    \  '<')\n      .replace(/&gt;/g,   '>')\n      .replace(/&quot;/g, '\"')\n   \
+    \   .replace(/&#x([0-9A-Fa-f]+);/g, (_, h) => String.fromCodePoint(parseInt(h,\
+    \ 16)));\n\n    if (!decoded.length) continue;\n\n    const rPrMatch = /<w:rPr>[\\\
+    s\\S]*?<\\/w:rPr>/.exec(runXml);\n    const rPrXml   = rPrMatch ? rPrMatch[0]\
+    \ : '';\n\n    runs.push({\n      plainStart:  plainOffset,\n      plainEnd: \
+    \   plainOffset + decoded.length,\n      xmlRunStart: runStart,\n      xmlRunEnd:\
+    \   runEnd,\n      tOpenTag,\n      rPrXml,\n      decoded\n    });\n\n    plainOffset\
+    \ += decoded.length;\n  }\n\n  return runs;\n}\n\n// ── Single-pass XML builder\
+    \ ───────────────────────────────────────────────────\n\nfunction buildNewXml(xml,\
+    \ runs, allMatches) {\n  // Use a Map (integer keys) to avoid plain-object prototype\
+    \ collisions\n  const byRun = new Map();\n\n  for (const match of allMatches)\
+    \ {\n    const lastChar = match.end - 1;\n    for (let ri = 0; ri < runs.length;\
+    \ ri++) {\n      const run = runs[ri];\n      if (lastChar >= run.plainStart &&\
+    \ lastChar < run.plainEnd) {\n        if (!byRun.has(ri)) byRun.set(ri, []);\n\
+    \        byRun.get(ri).push({ splitAt: lastChar - run.plainStart + 1, term: match.term\
+    \ });\n        break;\n      }\n    }\n  }\n\n  // Sort each run's injections\
+    \ by split position\n  for (const [, injs] of byRun) {\n    injs.sort((a, b) =>\
+    \ a.splitAt - b.splitAt);\n  }\n\n  let result = '';\n  let xmlCursor = 0;\n\n\
+    \  for (let ri = 0; ri < runs.length; ri++) {\n    const run = runs[ri];\n\n \
+    \   if (!byRun.has(ri)) {\n      result += xml.slice(xmlCursor, run.xmlRunEnd);\n\
+    \      xmlCursor = run.xmlRunEnd;\n      continue;\n    }\n\n    result += xml.slice(xmlCursor,\
+    \ run.xmlRunStart);\n    xmlCursor = run.xmlRunEnd;\n\n    const sortedInjs =\
+    \ byRun.get(ri);\n    let textPos = 0;\n\n    for (const inj of sortedInjs) {\n\
+    \      const before = run.decoded.slice(textPos, inj.splitAt);\n      if (before)\
+    \ {\n        result += `<w:r>${run.rPrXml}${run.tOpenTag}${encodeXml(before)}</w:t></w:r>`;\n\
+    \      }\n      result += xeRunXml(inj.term);\n      textPos = inj.splitAt;\n\
+    \    }\n\n    const remainder = run.decoded.slice(textPos);\n    if (remainder)\
+    \ {\n      result += `<w:r>${run.rPrXml}${run.tOpenTag}${encodeXml(remainder)}</w:t></w:r>`;\n\
+    \    }\n  }\n\n  const lastRun = runs[runs.length - 1];\n  if (lastRun) result\
+    \ += xml.slice(xmlCursor);\n  else result = xml;\n\n  return result;\n}\n\n//\
+    \ ── Generate Index ────────────────────────────────────────────────────────────\n\
+    \nasync function generateIndex() {\n  setStatus('Scanning document...');\n  setProgress('');\n\
+    \n  try {\n    await Word.run(async context => {\n      const body = context.document.body;\n\
+    \n      setProgress('Step 1: getting OOXML...');\n      // Use getRange().getOoxml()\
+    \ as an alternative call path\n      const fullRange = body.getRange('Whole');\n\
+    \      const ooxmlResult = fullRange.getOoxml();\n      await context.sync();\n\
+    \n      setProgress('Step 2: stripping field results...');\n      const xml =\
+    \ stripFieldResults(ooxmlResult.value);\n\n      setProgress('Step 3: building\
+    \ run map...');\n      const runs = buildRunMap(xml);\n      setProgress(`Step\
+    \ 3 done: ${runs.length} runs found`);\n\n      const plainText = runs.map(r =>\
+    \ r.decoded).join('');\n\n      setProgress('Step 4: building index plan...');\n\
+    \      const config = {\n        caseSensitive:  getCaseSensitive(),\n       \
+    \ excludeWords:   parseLines('excludeWords'),\n        includeWords:   parseLines('includeWords'),\n\
+    \        includePhrases: parseLines('includePhrases')\n      };\n      const plan\
+    \ = buildIndexPlan(plainText, config);\n\n      setProgress('Step 5: building\
+    \ match list...');\n      const allMatches = [\n        ...plan.phraseMatches.map(m\
+    \ => ({ term: m.phrase, end: m.end })),\n        ...plan.wordEntries.map(m =>\
+    \   ({ term: m.term,   end: m.end }))\n      ];\n\n      setProgress(`Step 6:\
+    \ inserting ${allMatches.length} XE entries...`);\n      const newXml = buildNewXml(xml,\
+    \ runs, allMatches);\n      body.insertOoxml(newXml, 'Replace');\n      await\
+    \ context.sync();\n\n      // ── Insert INDEX field at end of document ──────────────────────────────\n\
+    \      // Re-read OOXML after XE insertion\n      const fullRange2 = body.getRange('Whole');\n\
+    \      const fullOoxmlResult = fullRange2.getOoxml();\n      await context.sync();\n\
+    \      let fullXml = fullOoxmlResult.value;\n\n      // Strip any previous INDEX\
+    \ block we inserted (idempotent re-run)\n      fullXml = stripIndexBlock(fullXml);\n\
+    \n      // Build: page break + \"Index\" Heading 1 + INDEX field paragraph\n \
+    \     const indexBlockOoxml =\n        '<w:p>' +\n          '<w:r><w:br w:type=\"\
+    page\"/></w:r>' +\n        '</w:p>' +\n        '<w:p>' +\n          '<w:pPr><w:pStyle\
+    \ w:val=\"Heading1\"/></w:pPr>' +\n          '<w:r><w:t>Index</w:t></w:r>' +\n\
+    \        '</w:p>' +\n        '<w:p>' +\n          '<w:r><w:fldChar w:fldCharType=\"\
+    begin\"/></w:r>' +\n          '<w:r><w:instrText xml:space=\"preserve\"> INDEX\
+    \ \\\\e \"  \" \\\\h \"A\" \\\\c \"2\" </w:instrText></w:r>' +\n          '<w:r><w:fldChar\
+    \ w:fldCharType=\"separate\"/></w:r>' +\n          '<w:r><w:t>Right-click here\
+    \ and choose Update Field to build the index.</w:t></w:r>' +\n          '<w:r><w:fldChar\
+    \ w:fldCharType=\"end\"/></w:r>' +\n        '</w:p>';\n\n      // Insert just\
+    \ before </w:body>\n      const bodyCloseIdx = fullXml.lastIndexOf('</w:body>');\n\
+    \      if (bodyCloseIdx !== -1) {\n        fullXml = fullXml.slice(0, bodyCloseIdx)\
+    \ + indexBlockOoxml + fullXml.slice(bodyCloseIdx);\n        body.insertOoxml(fullXml,\
+    \ 'Replace');\n        await context.sync();\n      }\n\n      setStatus(`Done.\
+    \ ${allMatches.length} XE entries inserted. Scroll to end, right-click the INDEX\
+    \ field and choose Update Field.`);\n      setProgress('');\n    });\n\n  } catch\
+    \ (e) {\n    setStatus('Error: ' + e.message);\n    setProgress('');\n  }\n}\n\
+    \n// ── Update Index ─────────────────────────────────────────────────────────────\n\
+    \nasync function updateIndex() {\n  setStatus('Updating INDEX field...');\n  setProgress('');\n\
+    \  try {\n    await Word.run(async context => {\n      // Try document-level fields\
+    \ first (broader API support)\n      let updated = false;\n      try {\n     \
+    \   const fields = context.document.fields;\n        fields.load('items');\n \
+    \       await context.sync();\n        fields.items.forEach(f => { try { f.updateResult();\
+    \ } catch (_) {} });\n        await context.sync();\n        updated = true;\n\
+    \      } catch (_) {}\n\n      if (!updated) {\n        // Fallback: select the\
+    \ whole document and use keyboard shortcut simulation\n        // by re-inserting\
+    \ the body OOXML which forces Word to re-evaluate fields\n        const body =\
+    \ context.document.body;\n        const ooxmlResult = body.getOoxml();\n     \
+    \   await context.sync();\n        body.insertOoxml(ooxmlResult.value, 'Replace');\n\
+    \        await context.sync();\n      }\n\n      setStatus('Index updated.');\n\
+    \      setProgress('');\n    });\n  } catch (e) {\n    const loc = e.stack ? e.stack.split('\\\
+    n').slice(0,4).join(' >> ') : '';\n    setStatus('Error: ' + e.message);\n   \
+    \ setProgress(loc);\n  }\n}\n\n// ── Strip INDEX block helper ─────────────────────────────────────────────────\n\
+    // Removes the three-paragraph block we inject:\n//   <w:p> page-break </w:p>\n\
+    //   <w:p> Heading1 \"Index\" </w:p>\n//   <w:p> INDEX field (may be rendered\
+    \ with content between separate/end) </w:p>\n// Works whether or not the field\
+    \ has been updated/rendered by Word.\nfunction stripIndexBlock(xml) {\n  // Anchor\
+    \ on the INDEX instrText we control, then strip everything from\n  // the preceding\
+    \ page-break <w:p> through to the closing </w:p> of the field.\n  // The rendered\
+    \ index content sits between fldCharType=\"separate\" and\n  // fldCharType=\"\
+    end\", so we consume [\\s\\S]*? to skip it regardless of length.\n  return xml.replace(\n\
+    \    /<w:p><w:r><w:br w:type=\"page\"\\/><\\/w:r><\\/w:p>[\\s\\S]*?<w:instrText[^>]*>\\\
+    s*INDEX\\s[\\s\\S]*?<\\/w:instrText>[\\s\\S]*?<w:fldChar[^>]*fldCharType=\"end\"\
+    [^>]*\\/><\\/w:r><\\/w:p>/,\n    ''\n  );\n}\n\n// ── Remove XE Codes ───────────────────────────────────────────────────────────\n\
+    \nasync function removeXeCodes() {\n  setStatus('Removing XE fields...');\n  setProgress('');\n\
+    \n  try {\n    await Word.run(async context => {\n      const body = context.document.body;\n\
+    \      const fullRange = body.getRange('Whole');\n      const ooxmlResult = fullRange.getOoxml();\n\
+    \      await context.sync();\n\n      let xml = stripFieldResults(ooxmlResult.value);\n\
+    \      const before = (xml.match(/<w:instrText[^>]*>\\s*XE\\b/g) || []).length;\n\
+    \n      // Also strip the INDEX block\n      xml = stripIndexBlock(xml);\n\n \
+    \     xml = xml.replace(\n        /<w:r\\b[^>]*>(?:<w:rPr>[\\s\\S]*?<\\/w:rPr>)?<w:fldChar[^>]*fldCharType=\"\
+    begin\"[^>]*\\/><\\/w:r>\\s*<w:r\\b[^>]*>(?:<w:rPr>[\\s\\S]*?<\\/w:rPr>)?<w:instrText[^>]*>\\\
+    s*XE\\b[\\s\\S]*?<\\/w:instrText><\\/w:r>\\s*<w:r\\b[^>]*>(?:<w:rPr>[\\s\\S]*?<\\\
+    /w:rPr>)?<w:fldChar[^>]*fldCharType=\"end\"[^>]*\\/><\\/w:r>/g,\n        ''\n\
+    \      );\n\n      const after  = (xml.match(/<w:instrText[^>]*>\\s*XE\\b/g) ||\
+    \ []).length;\n      const removed = before - after;\n\n      body.insertOoxml(xml,\
+    \ 'Replace');\n      await context.sync();\n\n      setStatus(`Removed ${removed}\
+    \ XE field${removed !== 1 ? 's' : ''}.`);\n      setProgress('');\n    });\n\n\
+    \  } catch (e) {\n    setStatus('Error: ' + e.message);\n    setProgress('');\n\
+    \  }\n}\n\n// ── Settings ──────────────────────────────────────────────────────────────────\n\
+    \nfunction saveSettings() {\n  const s = Office.context.document.settings;\n \
+    \ s.set('excludeWords',   parseLines('excludeWords'));\n  s.set('includeWords',\
+    \   parseLines('includeWords'));\n  s.set('includePhrases', parseLines('includePhrases'));\n\
+    \  s.set('caseSensitive',  getCaseSensitive());\n  s.saveAsync(r => setStatus(\n\
+    \    r.status === Office.AsyncResultStatus.Succeeded ? 'Settings saved.' : 'Save\
+    \ failed.'\n  ));\n}\n\nfunction loadSettings() {\n  const s = Office.context.document.settings;\n\
+    \  // Fall back to the built-in default list if the user has never saved one\n\
+    \  const savedExclude = s.get('excludeWords');\n  document.getElementById('excludeWords').value\
+    \ =\n    savedExclude != null ? savedExclude.join('\\n') : DEFAULT_EXCLUDE_WORDS;\n\
+    \  document.getElementById('includeWords').value   = (s.get('includeWords')  \
+    \ || []).join('\\n');\n  const savedPhrases = s.get('includePhrases');\n  document.getElementById('includePhrases').value\
+    \ =\n    savedPhrases != null ? savedPhrases.join('\\n') : DEFAULT_INCLUDE_PHRASES;\n\
+    \  document.getElementById('caseSensitive').checked = !!s.get('caseSensitive');\n\
+    }\n\n// ── Startup ───────────────────────────────────────────────────────────────────\n\
+    \nOffice.onReady(() => {\n  loadSettings();\n  document.getElementById('generateBtn').addEventListener('click',\
+    \ generateIndex);\n  document.getElementById('updateIndexBtn').addEventListener('click',\
+    \ updateIndex);\n  document.getElementById('removeBtn').addEventListener('click',\
+    \ removeXeCodes);\n  document.getElementById('saveBtn').addEventListener('click',\
+    \ saveSettings);\n});\n"
+  language: javascript
+template:
+  content: "<div style=\"font-family: Calibri; padding: 10px;\">\n  <h2 style=\"margin:0\
+    \ 0 8px 0;\">DavidsIndexer</h2>\n  <p id=\"status\" style=\"color:#444; margin:4px\
+    \ 0;\">Ready.</p>\n  <p id=\"progress\" style=\"color:#888; margin:4px 0; font-size:0.9em;\"\
+    ></p>\n  <label style=\"display:flex; align-items:center; gap:6px; margin:8px\
+    \ 0;\">\n    <input type=\"checkbox\" id=\"caseSensitive\"/>\n    Case sensitive\
+    \ matching\n  </label>\n  <label>Exclude words (one per line)</label><br/>\n \
+    \ <textarea id=\"excludeWords\" rows=\"4\" style=\"width:100%; box-sizing:border-box;\"\
+    ></textarea><br/><br/>\n  <label>Include words (one per line)</label><br/>\n \
+    \ <textarea id=\"includeWords\" rows=\"4\" style=\"width:100%; box-sizing:border-box;\"\
+    ></textarea><br/><br/>\n  <label>Include phrases (one per line)</label><br/>\n\
+    \  <textarea id=\"includePhrases\" rows=\"4\" style=\"width:100%; box-sizing:border-box;\"\
+    ></textarea><br/><br/>\n  <button id=\"generateBtn\" style=\"margin-right:6px;\"\
+    >Generate Index</button>\n  <button id=\"updateIndexBtn\" style=\"margin-right:6px;\"\
+    >Update Index</button>\n  <button id=\"removeBtn\">Remove XE Codes</button><br/><br/>\n\
+    \  <button id=\"saveBtn\">Save cached settings</button>\n</div>"
+  language: html
+style:
+  content: 'body { font-family: Calibri; padding: 10px; }
+
+    button { margin: 2px; padding: 6px 12px; }'
+  language: css
+libraries: 'https://appsforoffice.microsoft.com/lib/1/hosted/office.js
+
+  @types/office-js
+
+  @types/office-runtime'
